@@ -1,0 +1,71 @@
+From 74d73c920c1dd10cc110752f5b66cf26ea055746 Mon Sep 17 00:00:00 2001
+From: TheAtt1la <alittauwu@gmail.com>
+Date: Wed, 17 May 2023 02:18:04 +0000
+Subject: [PATCH 5/5] Revert udfps: Forward port Boost framework hook.
+
+---
+ .../systemui/biometrics/UdfpsController.java  | 20 -------------------
+ 1 file changed, 20 deletions(-)
+
+diff --git a/packages/SystemUI/src/com/android/systemui/biometrics/UdfpsController.java b/packages/SystemUI/src/com/android/systemui/biometrics/UdfpsController.java
+index 0329ca2490c6..c6396ab907d2 100644
+--- a/packages/SystemUI/src/com/android/systemui/biometrics/UdfpsController.java
++++ b/packages/SystemUI/src/com/android/systemui/biometrics/UdfpsController.java
+@@ -52,7 +52,6 @@ import android.os.VibrationAttributes;
+ import android.os.VibrationEffect;
+ import android.os.UserHandle;
+ import android.provider.Settings;
+-import android.util.BoostFramework;
+ import android.util.Log;
+ import android.util.RotationUtils;
+ import android.view.LayoutInflater;
+@@ -208,11 +207,6 @@ public class UdfpsController implements DozeReceiver, Dumpable {
+ 
+     private UdfpsAnimation mUdfpsAnimation;
+ 
+-    // Boostframework for UDFPS
+-    private BoostFramework mPerf = null;
+-    private boolean mIsPerfLockAcquired = false;
+-    private static final int BOOST_DURATION_TIMEOUT = 2000;
+-
+     @VisibleForTesting
+     public static final VibrationAttributes UDFPS_VIBRATION_ATTRIBUTES =
+             new VibrationAttributes.Builder()
+@@ -833,8 +827,6 @@ public class UdfpsController implements DozeReceiver, Dumpable {
+ 
+         mUdfpsVendorCode = mContext.getResources().getInteger(R.integer.config_udfps_vendor_code);
+ 
+-        mPerf = new BoostFramework();
+-
+         mAmbientDisplayConfiguration = new AmbientDisplayConfiguration(mContext);
+         mSecureSettings = secureSettings;
+         updateScreenOffFodState();
+@@ -928,13 +920,6 @@ public class UdfpsController implements DozeReceiver, Dumpable {
+         } else {
+             Log.v(TAG, "showUdfpsOverlay | the overlay is already showing");
+         }
+-
+-        if (mPerf != null && !mIsPerfLockAcquired) {
+-            mPerf.perfHint(BoostFramework.VENDOR_HINT_FIRST_LAUNCH_BOOST,
+-                    null,
+-                    BOOST_DURATION_TIMEOUT);
+-            mIsPerfLockAcquired = true;
+-        }
+     }
+ 
+     private void hideUdfpsOverlay() {
+@@ -1226,11 +1211,6 @@ public class UdfpsController implements DozeReceiver, Dumpable {
+             unconfigureDisplay(view);
+         }
+         cancelAodSendFingerUpAction();
+-
+-            if (mPerf != null && mIsPerfLockAcquired) {
+-            mPerf.perfLockRelease();
+-            mIsPerfLockAcquired = false;
+-        }
+     }
+ 
+     /**
+-- 
+2.34.1
+
