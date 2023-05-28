@@ -1,0 +1,24 @@
+From 4cc658d7a763055b42fb492472e2578ae587c0da Mon Sep 17 00:00:00 2001
+From: TheAtt1la <alittauwu@gmail.com>
+Date: Fri, 19 May 2023 06:45:21 +0000
+Subject: [PATCH 40/40] Add missing line in FOD patch
+
+---
+ .../core/java/com/android/server/biometrics/AuthService.java     | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/services/core/java/com/android/server/biometrics/AuthService.java b/services/core/java/com/android/server/biometrics/AuthService.java
+index c9654576540a..b47b47c41f76 100644
+--- a/services/core/java/com/android/server/biometrics/AuthService.java
++++ b/services/core/java/com/android/server/biometrics/AuthService.java
+@@ -945,6 +945,7 @@ public class AuthService extends SystemService {
+         int[] udfpsProps = getContext().getResources().getIntArray(
+                 com.android.internal.R.array.config_udfps_sensor_props);
+ 
++        boolean isUdfps = !ArrayUtils.isEmpty(udfpsProps);
+         if(!isUdfps) udfpsProps = dynamicUdfpsProps();
+         isUdfps = !ArrayUtils.isEmpty(udfpsProps);
+ 
+-- 
+2.34.1
+

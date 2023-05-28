@@ -1,0 +1,49 @@
+From 9dd3cd81c2e43a2290e96602dab224597d67f022 Mon Sep 17 00:00:00 2001
+From: TheAtt1la <alittauwu@gmail.com>
+Date: Sat, 27 May 2023 22:43:13 -0300
+Subject: [PATCH 2/3] Revert "Treat failure to create a process group as fatal"
+
+Revert this commit: Ib34b4a100c65a9a2705aaef8e7e32322fbedc531
+---
+ core/jni/com_android_internal_os_Zygote.cpp              | 9 ++++-----
+ .../core/java/com/android/server/am/ProcessList.java     | 4 ++--
+ 2 files changed, 6 insertions(+), 7 deletions(-)
+
+diff --git a/core/jni/com_android_internal_os_Zygote.cpp b/core/jni/com_android_internal_os_Zygote.cpp
+index 5d9fada..6e2ea35 100644
+--- a/core/jni/com_android_internal_os_Zygote.cpp
++++ b/core/jni/com_android_internal_os_Zygote.cpp
+@@ -1787,11 +1787,10 @@ static void SpecializeCommon(JNIEnv* env, uid_t uid, gid_t gid, jintArray gids,
+     // since the directory is owned by root.
+     if (!is_system_server && getuid() == 0) {
+         const int rc = createProcessGroup(uid, getpid());
+-        if (rc != 0) {
+-            fail_fn(rc == -EROFS ? CREATE_ERROR("createProcessGroup failed, kernel missing "
+-                                                "CONFIG_CGROUP_CPUACCT?")
+-                                 : CREATE_ERROR("createProcessGroup(%d, %d) failed: %s", uid,
+-                                                /* pid= */ 0, strerror(-rc)));
++        if (rc == -EROFS) {
++            ALOGW("createProcessGroup failed, kernel missing CONFIG_CGROUP_CPUACCT?");
++        } else if (rc != 0) {
++            ALOGE("createProcessGroup(%d, %d) failed: %s", uid, /* pid= */ 0, strerror(-rc));
+         }
+     }
+ 
+diff --git a/services/core/java/com/android/server/am/ProcessList.java b/services/core/java/com/android/server/am/ProcessList.java
+index 43f26fc..4d0ea26 100644
+--- a/services/core/java/com/android/server/am/ProcessList.java
++++ b/services/core/java/com/android/server/am/ProcessList.java
+@@ -2327,8 +2327,8 @@ public final class ProcessList {
+             if (!regularZygote) {
+                 // webview and app zygote don't have the permission to create the nodes
+                 if (Process.createProcessGroup(uid, startResult.pid) < 0) {
+-                    throw new AssertionError("Unable to create process group for " + app.processName
+-                            + " (" + startResult.pid + ")");
++                    Slog.e(ActivityManagerService.TAG, "Unable to create process group for "
++                            + app.processName + " (" + startResult.pid + ")");
+                 }
+             }
+ 
+-- 
+2.39.2
+
