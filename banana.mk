@@ -6,7 +6,6 @@ $(call inherit-product, device/banana/sepolicy/common/sepolicy.mk)
 
 TARGET_HAS_FUSEBLK_SEPOLICY_ON_VENDOR := true
 TARGET_USES_PREBUILT_VENDOR_SEPOLICY := true
-SELINUX_IGNORE_NEVERALLOWS := true
 
 TARGET_NO_KERNEL_OVERRIDE := true
 TARGET_NO_KERNEL_IMAGE := true
